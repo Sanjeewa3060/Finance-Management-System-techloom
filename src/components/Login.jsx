@@ -8,7 +8,16 @@ import LoginProductShowcase from './LoginProductShowcase.jsx'
 import { useTheme } from '../context/ThemeContext.jsx'
 import { getDeviceInfo } from '../utils/deviceInfo.js'
 
-export default function Login({ onLogin, loading = false, error = null, connectionWarning = null, onRetryConnection }) {
+export default function Login({
+  onLogin,
+  loading = false,
+  error = null,
+  connectionWarning = null,
+  onRetryConnection,
+  asgardeoConfigured = false,
+  asgardeoLoading = false,
+  onAsgardeoSignIn,
+}) {
   const location = useLocation()
   const success = location.state?.success
   const { theme, toggleTheme } = useTheme()
@@ -167,9 +176,26 @@ export default function Login({ onLogin, loading = false, error = null, connecti
               </div>
 
               <button type="submit" disabled={busy} className="login-submit-btn">
-                {busy ? 'Signing in…' : 'Sign in'}
+                {submitting || loading ? 'Signing in…' : 'Sign in'}
               </button>
             </form>
+
+            <div className="login-divider" role="separator">
+              <span>or</span>
+            </div>
+            <button
+              type="button"
+              className="login-asgardeo-btn"
+              disabled={busy || asgardeoLoading || !asgardeoConfigured}
+              onClick={onAsgardeoSignIn}
+            >
+              {asgardeoLoading ? 'Continuing…' : 'Continue with Asgardeo'}
+            </button>
+            {!asgardeoConfigured ? (
+              <p className="login-asgardeo-note">
+                Add the Kaionex FMS client ID as VITE_ASGARDEO_CLIENT_ID in .env, then restart the dev server.
+              </p>
+            ) : null}
           </div>
 
           <p className="login-panel__legal">

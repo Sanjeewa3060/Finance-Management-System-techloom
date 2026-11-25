@@ -45,6 +45,11 @@ import {
   downloadStoredBackup,
 } from './utils/systemBackup.js'
 import { getDeviceInfo } from './utils/deviceInfo.js'
+import { useFmsAsgardeo } from './auth/AsgardeoRoot.jsx'
+import { ASGARDEO_DENIED_KEY, ASGARDEO_PENDING_KEY, FMS_ACCESS_GROUP } from './auth/asgardeoConfig.js'
+import { hasGroup } from './auth/groups.js'
+import { linkAsgardeoCustomer } from './auth/linkCustomer.js'
+import Unauthorized from './components/Unauthorized.jsx'
 import { DEFAULT_CURRENCY } from './utils/money.js'
 import { buildSensitiveMessage, fetchSensitiveEvents, maybePurgeExpiredSensitiveEvents, recordActorSensitiveActivity, recordSensitiveActivity } from './utils/sensitiveEvents.js'
 
@@ -86,6 +91,9 @@ export default function App() {
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
   const [authUser, setAuthUser] = useState(null) // { id, role, email, full_name, phone, address }
+  const [asgardeoDenied, setAsgardeoDenied] = useState(null)
+  const [asgardeoBusy, setAsgardeoBusy] = useState(false)
+  const asgardeo = useFmsAsgardeo()
   const [authHydrated, setAuthHydrated] = useState(false)
   const [authSubmitting, setAuthSubmitting] = useState(false)
   const [authError, setAuthError] = useState(null)
@@ -194,6 +202,77 @@ export default function App() {
       cancelled = true
     }
   }, [])
+
+  useEffect(() => {
+    if (!asgardeo.configured || asgardeo.isLoading || !authHydrated) return
+    const pending = sessionStorage.getItem(ASGARDEO_PENDING_KEY) === '1'
+    const asgardeoSession = authUser?.authProvider === 'asgardeo'
+
+    if (!asgardeo.isSignedIn) {
+      if (asgardeoSession) {
+        clearAuthStorage()
+        setAuthUser(null)
+      }
+      return
+    }
+
+    if (sessionStorage.getItem(ASGARDEO_DENIED_KEY) === '1' && !pending) {
+      if (window.location.pathname !== '/unauthorized') navigate('/unauthorized')
+      return
+    }
+
+    if (!pending && !asgardeoSession) return
+
+    let cancelled = false
+    ;(async () => {
+      try {
+        const identity = await asgardeo.readIdentity()
+        if (cancelled) return
+        if (!hasGroup(identity.groups, FMS_ACCESS_GROUP)) {
+          sessionStorage.removeItem(ASGARDEO_PENDING_KEY)
+          sessionStorage.setItem(ASGARDEO_DENIED_KEY, '1')
+          clearAuthStorage()
+          setAuthUser(null)
+          setAsgardeoDenied({ email: identity.email, groups: identity.groups })
+          navigate('/unauthorized')
+          return
+        }
+        if (asgardeoSession && authUser?.email?.toLowerCase() === identity.email) {
+          sessionStorage.removeItem(ASGARDEO_PENDING_KEY)
+          sessionStorage.removeItem(ASGARDEO_DENIED_KEY)
+          setAsgardeoDenied(null)
+          return
+        }
+        const user = await linkAsgardeoCustomer(identity.email)
+        if (cancelled) return
+        sessionStorage.removeItem(ASGARDEO_PENDING_KEY)
+        sessionStorage.removeItem(ASGARDEO_DENIED_KEY)
+        setAsgardeoDenied(null)
+        persistAuthUser({ ...user, authProvider: 'asgardeo' }, false)
+        setAuthUser(user)
+        await registerSession(user)
+        const path = window.location.pathname
+        if (path === '/' || path === '/login' || path === '/unauthorized') navigate('/dashboard')
+      } catch (e) {
+        if (cancelled) return
+        sessionStorage.removeItem(ASGARDEO_PENDING_KEY)
+        setAuthError(e?.message ?? 'Asgardeo sign-in failed.')
+        if (window.location.pathname !== '/login') navigate('/login')
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [
+    asgardeo.configured,
+    asgardeo.isLoading,
+    asgardeo.isSignedIn,
+    authHydrated,
+    authUser?.authProvider,
+    authUser?.email,
+    navigate,
+  ])
 
   useEffect(() => {
     let cancelled = false
@@ -763,14 +842,41 @@ export default function App() {
     }
   }, [navigate, refreshData, upgradePasswordIfNeeded, dbConnectionError, retryDbConnection])
 
+  const handleAsgardeoSignIn = useCallback(async () => {
+    if (!asgardeo.configured) return
+    setAuthError(null)
+    setAsgardeoBusy(true)
+    sessionStorage.removeItem(ASGARDEO_DENIED_KEY)
+    sessionStorage.setItem(ASGARDEO_PENDING_KEY, '1')
+    try {
+      await asgardeo.signIn()
+    } catch (e) {
+      sessionStorage.removeItem(ASGARDEO_PENDING_KEY)
+      setAuthError(e?.message ?? 'Asgardeo sign-in failed.')
+      setAsgardeoBusy(false)
+    }
+  }, [asgardeo])
+
   const handleLogout = useCallback(async () => {
     const user = authUser
+    const viaAsgardeo = user?.authProvider === 'asgardeo' || asgardeo.isSignedIn
     setAuthUser(null)
     setAuthError(null)
+    setAsgardeoDenied(null)
     if (user) await revokeCurrentSession(user)
     clearAuthStorage()
+    sessionStorage.removeItem(ASGARDEO_PENDING_KEY)
+    sessionStorage.removeItem(ASGARDEO_DENIED_KEY)
+    if (viaAsgardeo && asgardeo.configured) {
+      try {
+        await asgardeo.signOut()
+        return
+      } catch (e) {
+        setAuthError(e?.message ?? 'Sign out failed.')
+      }
+    }
     navigate('/login')
-  }, [navigate, authUser])
+  }, [navigate, authUser, asgardeo])
 
   useEffect(() => {
     if (!authHydrated || !authUser) return
@@ -1779,6 +1885,19 @@ export default function App() {
               error={authError}
               connectionWarning={dbConnectionError}
               onRetryConnection={retryDbConnection}
+              asgardeoConfigured={asgardeo.configured}
+              asgardeoLoading={asgardeoBusy || (asgardeo.configured && asgardeo.isLoading)}
+              onAsgardeoSignIn={handleAsgardeoSignIn}
+            />
+          }
+        />
+        <Route
+          path="/unauthorized"
+          element={
+            <Unauthorized
+              email={asgardeoDenied?.email}
+              groups={asgardeoDenied?.groups}
+              onSignOut={handleLogout}
             />
           }
         />

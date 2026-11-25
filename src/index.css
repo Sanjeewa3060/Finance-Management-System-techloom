@@ -2039,6 +2039,53 @@ body.login-no-scroll {
   cursor: not-allowed;
 }
 
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0 0.85rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: #e2e8f0;
+}
+
+.login-asgardeo-btn {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.7rem;
+  background: #fff;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+.login-asgardeo-btn:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.login-asgardeo-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.login-asgardeo-note {
+  margin-top: 0.65rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #64748b;
+}
+
 .login-theme-toggle {
   border: 1px solid #e2e8f0;
   background: #fff;
@@ -2120,6 +2167,29 @@ html[data-theme='dark'] .auth-back-btn {
 
 html[data-theme='dark'] .login-submit-btn {
   background: #10b981;
+}
+
+html[data-theme='dark'] .login-divider {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .login-divider::before,
+html[data-theme='dark'] .login-divider::after {
+  background: #334155;
+}
+
+html[data-theme='dark'] .login-asgardeo-btn {
+  border-color: #334155;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+html[data-theme='dark'] .login-asgardeo-btn:hover:not(:disabled) {
+  background: #1e293b;
+}
+
+html[data-theme='dark'] .login-asgardeo-note {
+  color: #94a3b8;
 }
 
 html[data-theme='dark'] .login-submit-btn:hover:not(:disabled) {
