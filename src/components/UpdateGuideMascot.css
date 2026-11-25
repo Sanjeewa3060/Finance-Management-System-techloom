@@ -1,0 +1,38 @@
+.fms-guide { position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); right: 20px; z-index: 140; font-family: inherit; }
+.fms-mascot { position: relative; display: block; margin-left: auto; width: 88px; height: 88px; border: 1px solid #087c69; border-radius: 50%; background: #102733; cursor: pointer; box-shadow: none; }
+.fms-mascot:hover { background: #153b40; }
+.fms-mascot:focus-visible, .fms-guide button:focus-visible { outline: 2px solid #6ee7b7; outline-offset: 4px; }
+.fms-mascot-orbit { display: block; position: relative; width: 100%; height: 100%; animation: fms-float 3s ease-in-out infinite; }
+.fms-mascot-body { position: absolute; top: 28px; left: 26px; width: 36px; height: 39px; border-radius: 48% 48% 44% 44%; background: #059669; box-shadow: none; }
+.fms-mascot-antenna { position: absolute; top: 17px; left: 35px; display: flex; gap: 2px; align-items: end; height: 8px; }
+.fms-mascot-antenna i { width: 5px; height: 5px; background: #50e5b3; border-radius: 50%; }
+.fms-mascot-antenna i:nth-child(2) { align-self: start; }
+.fms-mascot-eyes { position: absolute; top: 13px; left: 8px; display: flex; gap: 7px; }
+.fms-mascot-eyes i { position: relative; width: 7px; height: 10px; background: #effff7; border-radius: 50%; }
+.fms-mascot-eyes i::after { content: ''; position: absolute; right: 1px; top: 3px; width: 3px; height: 5px; background: #07594e; border-radius: 50%; }
+.fms-mascot-smile { position: absolute; left: 15px; top: 26px; width: 7px; height: 4px; border-bottom: 2px solid #07594e; border-radius: 50%; }
+.fms-mascot-feet::before, .fms-mascot-feet::after { content: ''; position: absolute; bottom: -3px; width: 10px; height: 7px; border-radius: 50%; background: #0ab68b; }
+.fms-mascot-feet::before { left: 3px; } .fms-mascot-feet::after { right: 3px; }
+.fms-mascot-badge { position: absolute; right: -2px; top: -2px; display: grid; place-items: center; width: 27px; height: 27px; border: 2px solid #13303b; border-radius: 50%; background: #059669; color: white; }
+.fms-mascot-badge.has-news { background: #00c98d; box-shadow: 0 0 0 4px #10b98120; }
+.fms-guide-panel { width: min(350px, calc(100vw - 40px)); max-height: 65vh; overflow-y: auto; margin-bottom: 14px; padding: 20px; border: 1px solid #286052; border-radius: 18px; background: #14232e; color: #edfdf7; box-shadow: 0 16px 60px #0006; }
+.fms-guide-heading { display: flex; align-items: center; justify-content: space-between; color: #6ee7b7; font-size: 10px; font-weight: 700; letter-spacing: .12em; margin-bottom: 16px; }
+.fms-guide button { cursor: pointer; } .fms-guide button:disabled { opacity: .5; cursor: wait; }
+.fms-guide-panel h3 { font-size: 18px; font-weight: 700; margin: 8px 0; }
+.fms-guide-panel p { color: #bfd0d5; font-size: 13px; line-height: 1.7; margin-bottom: 18px; }
+.fms-guide-count { color: #88a6ac; font-size: 11px; }
+.fms-guide-dots { display: flex; gap: 5px; margin-bottom: 18px; }
+.fms-guide-dots span { width: 6px; height: 6px; border-radius: 5px; background: #3b555d; } .fms-guide-dots .active { width: 20px; background: #34d399; }
+.fms-guide-actions, .fms-guide-actions > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; }
+.fms-guide-primary { padding: 8px 14px; background: #059669; color: white; border-radius: 8px; font-size: 12px; font-weight: 600; }
+.fms-guide-primary:hover { background: #047857; }
+@keyframes fms-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .fms-mascot-orbit { animation: none; } }
+/* Hide chatbot/guide on print only — keep visible on screen so reports stay usable */
+@media print {
+  .fms-guide,
+  .fms-guide * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}

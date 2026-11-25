@@ -1,0 +1,26 @@
+{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/((?!api(?:/|$)).*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron-backup",
+      "schedule": "30 18 * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+    },
+    {
+      "source": "/index.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+    },
+    {
+      "source": "/version.json",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+    }
+  ]
+}

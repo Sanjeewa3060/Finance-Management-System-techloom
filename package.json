@@ -1,0 +1,50 @@
+{
+  "name": "construction_tracker",
+  "version": "1.1.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:db": "node scripts/test-db.mjs",
+    "migrate:db": "node scripts/apply-pending-migrations.mjs",
+    "test:sessions": "node scripts/test-sessions.mjs",
+    "test:sensitive-events": "node scripts/test-sensitive-events.mjs",
+    "seed:admin": "node scripts/seed-admin.mjs",
+    "seed:categories": "node scripts/seed-categories.mjs",
+    "seed:demo": "node scripts/seed-demo-transactions.mjs",
+    "migrate:sensitive-events": "node scripts/apply-sensitive-events.mjs",
+    "test:other": "node scripts/test-other-entry.mjs",
+    "test:tax": "node scripts/test-tax-computation.mjs",
+    "test:pnl": "node scripts/test-pnl-detailed.mjs",
+    "test:ocr": "node scripts/test-analyze-bill.mjs",
+    "backup:worker": "node scripts/backup-worker.mjs",
+    "test:backup-worker": "node --test scripts/test-backup-worker.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.1",
+    "archiver": "^8.0.0",
+    "bcryptjs": "^3.0.3",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^1.17.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.16.0",
+    "recharts": "^3.8.1",
+    "tesseract.js": "^6.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.0",
+    "@vitejs/plugin-react": "^6.0.2",
+    "autoprefixer": "^10.5.0",
+    "pg": "^8.21.0",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^4.3.0",
+    "vite": "^8.0.16"
+  }
+}
